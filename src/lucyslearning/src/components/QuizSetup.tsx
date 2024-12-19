@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import OpenAI from 'openai';
 import LoadingSpinner from './LoadingSpinner';
+import { generatePrompt, getSystemPrompt } from '../utils/quizPrompts';
+import { Question } from '../types/QuizTypes';
 
 interface QuizSetupProps {
     onQuestions: (questions: any[]) => void;
@@ -18,55 +20,6 @@ const QuizSetup = ({ onQuestions }: QuizSetupProps) => {
         dangerouslyAllowBrowser: true
     });
 
-    const generatePrompt = (theme: string, mathCount: number, grammarCount: number, stage: string) => {
-        const ks2Prompt = `Create a UK Key Stage 2 (Year 5-6) quiz with ${mathCount} math questions and ${grammarCount} grammar questions. Theme: ${theme}.
-
-Requirements for KS2:
-- Math questions should be a mix of:
-  * Calculation questions requiring numeric answers
-  * Standard long division and long multiplication questions
-  * Word problems requiring numeric answers
-  * Questions about fractions, decimals, and percentages
-- Grammar questions should focus on:
-  * Using commas in complex sentences
-  * Using apostrophes correctly
-  * Basic sentence structure
-  * Word types (nouns, verbs, adjectives, adverbs)`;
-
-        const ks3Prompt = `Create a UK Key Stage 3 (Year 7-9) quiz with ${mathCount} math questions and ${grammarCount} grammar questions. Theme: ${theme}.
-
-Requirements for KS3:
-- Math questions should be a mix of:
-  * Algebra and equations
-  * Geometry and measurements
-  * Statistics and probability
-  * More complex word problems
-  * Questions involving negative numbers and indices
-- Grammar questions should focus on:
-  * Advanced punctuation usage
-  * Complex sentence structures
-  * Active and passive voice
-  * More sophisticated vocabulary
-  * Writing techniques and effects`;
-
-        const basePrompt = stage === 'ks2' ? ks2Prompt : ks3Prompt;
-
-        return `${basePrompt}
-
-All questions should incorporate the ${theme} theme
-Return a JSON object with this exact structure:
-{
-  "questions": [{
-    "type": "math" | "grammar",
-    "questionType": "numeric" | "text",
-    "question": "question text",
-    "correctAnswer": "answer" (string for text, number for numeric),
-    "explanation": "explanation of the answer",
-    "unit": "optional unit for numeric answers (e.g., meters, seconds)"
-  }]
-}`;
-    };
-
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
@@ -74,10 +27,15 @@ Return a JSON object with this exact structure:
                 model: "gpt-4-turbo-preview",
                 messages: [{
                     role: "system",
-                    content: `You are an expert teacher creating educational content for a ${keyStage === 'ks2' ? '10' : '13'}-year-old student. Create engaging questions that incorporate the given theme while maintaining educational value appropriate for ${keyStage.toUpperCase()}.`
+                    content: getSystemPrompt(keyStage)
                 }, {
                     role: "user",
-                    content: generatePrompt(theme, mathQuestions, grammarQuestions, keyStage)
+                    content: generatePrompt({
+                        theme,
+                        mathCount: mathQuestions,
+                        grammarCount: grammarQuestions,
+                        stage: keyStage
+                    })
                 }],
                 response_format: { type: "json_object" }
             });
@@ -117,8 +75,8 @@ Return a JSON object with this exact structure:
                                 <button
                                     onClick={() => setKeyStage('ks2')}
                                     className={`p-4 rounded-xl border-2 transition-all duration-200 transform hover:scale-105 ${keyStage === 'ks2'
-                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-transparent shadow-lg'
-                                            : 'bg-white text-indigo-600 border-indigo-200 hover:border-indigo-400'
+                                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-transparent shadow-lg'
+                                        : 'bg-white text-indigo-600 border-indigo-200 hover:border-indigo-400'
                                         }`}
                                 >
                                     Key Stage 2
@@ -127,8 +85,8 @@ Return a JSON object with this exact structure:
                                 <button
                                     onClick={() => setKeyStage('ks3')}
                                     className={`p-4 rounded-xl border-2 transition-all duration-200 transform hover:scale-105 ${keyStage === 'ks3'
-                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-transparent shadow-lg'
-                                            : 'bg-white text-indigo-600 border-indigo-200 hover:border-indigo-400'
+                                        ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-transparent shadow-lg'
+                                        : 'bg-white text-indigo-600 border-indigo-200 hover:border-indigo-400'
                                         }`}
                                 >
                                     Key Stage 3
@@ -164,7 +122,7 @@ Return a JSON object with this exact structure:
                                     onChange={(e) => setMathQuestions(Number(e.target.value))}
                                     className="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 cursor-pointer transition-all duration-200"
                                 >
-                                    {[5, 10, 15, 20].map(count => (
+                                    {[1, 5, 10, 15, 20].map(count => (
                                         <option key={count} value={count}>
                                             {count} questions
                                         </option>
@@ -181,7 +139,7 @@ Return a JSON object with this exact structure:
                                     onChange={(e) => setGrammarQuestions(Number(e.target.value))}
                                     className="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 cursor-pointer transition-all duration-200"
                                 >
-                                    {[5, 10, 15, 20].map(count => (
+                                    {[1, 5, 10, 15, 20].map(count => (
                                         <option key={count} value={count}>
                                             {count} questions
                                         </option>
