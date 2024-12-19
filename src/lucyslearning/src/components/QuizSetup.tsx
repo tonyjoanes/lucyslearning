@@ -2,7 +2,6 @@ import { useState } from 'react';
 import OpenAI from 'openai';
 import LoadingSpinner from './LoadingSpinner';
 import { generatePrompt, getSystemPrompt } from '../utils/quizPrompts';
-import { Question } from '../types/QuizTypes';
 
 interface QuizSetupProps {
     onQuestions: (questions: any[]) => void;
