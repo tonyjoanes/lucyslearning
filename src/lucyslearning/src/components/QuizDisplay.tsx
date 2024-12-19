@@ -84,7 +84,7 @@ const QuizDisplay = ({ questions, onComplete, onReset }: QuizDisplayProps) => {
     const correctAnswers = Object.values(userAnswers).filter(answer => answer.correct).length;
 
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="mx-auto">
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg p-8 border border-blue-100">
                 {/* Header with progress and reset */}
                 <div className="flex justify-between items-center mb-6">
