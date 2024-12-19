@@ -1,5 +1,16 @@
 # lucyslearning
+
 Learning quiz application for Lucy
+
+## Running
+
+You will need to setup an account and create an API key with https://platform.openai.com/
+
+- Clone the repo `git clone https://github.com/tonyjoanes/lucyslearning.git`
+- Goto directory `cd lucyslearning/src/lucyslearning`
+- Install the dependencies `npm install`
+- Run the app `npm run dev`
+- ENJOY!!
 
 # Lucy's Learning Quiz
 
